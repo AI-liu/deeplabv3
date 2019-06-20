@@ -11,7 +11,7 @@ from deeplabv3 import DeepLabV3
 # dataset
 batch_size= 2
 dataset=CityScapeDataSet()
-data_loader = data.DataLoader(dataset, batch_size, shuffle=True)
+data_loader = data.DataLoader(dataset, batch_size, shuffle=True , drop_last =True)
 
 # model
 model = DeepLabV3()
