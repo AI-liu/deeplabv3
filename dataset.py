@@ -144,18 +144,16 @@ class CityScapeDataSet(torch.utils.data.Dataset):
 
         input_image = Image.open(example["img_path"])
         input_image = input_image.resize((int(input_image.width/2),int(input_image.height/2)),Image.NEAREST)
-        preprocess = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),])
-        input_tensor = preprocess(input_image)
+        input_tensor = transforms.ToTensor()(input_image)
 
         label_image = Image.open(example["label_img_path"])
         label_image = label_image.resize((int(label_image.width/2),int(label_image.height/2)),Image.NEAREST)
         # Remap class labels
         label_image = remap(label_image, self.full_classes, self.new_classes)
-
         label_tensor = PILToLongTensor()(label_image)
 
         # Use augmentation
-        #input_tensor, label_tensor = dataaug(input_tensor, label_tensor)
+        input_tensor, label_tensor = dataaug(input_tensor, label_tensor)
         
         return  input_tensor , label_tensor
 
