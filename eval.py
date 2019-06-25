@@ -8,6 +8,7 @@ from collections import OrderedDict
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 # Default encoding for pixel value, class name, and class color
 color_encoding = OrderedDict([
             ('unlabeled', (0, 0, 0)),
@@ -113,17 +114,16 @@ def imshow_batch(images, labels):
 
 
 
-model = torch.load('deeplabv3_150.pth')
+model = torch.load('deeplabv3_90_mIoU_0.683.pth')
 model.eval()
 print(model)
 
 
 
 input_image = Image.open("aachen_000000_000019_leftImg8bit.png")
-input_image = input_image.resize((int(input_image.width/2),int(input_image.height/2)),Image.NEAREST)
+input_image = input_image.resize((1024,512),Image.NEAREST)
 preprocess = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
 input_tensor = preprocess(input_image)
@@ -142,5 +142,6 @@ predictions = output.argmax(0)
 label_to_rgb = transforms.Compose([ LongTensorToRGBPIL(color_encoding), transforms.ToTensor()])
 color_predictions = label_to_rgb(predictions.cpu())
 imshow_batch(transforms.ToTensor()(input_image).data.cpu(), color_predictions)
+
 
 
