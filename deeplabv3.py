@@ -3,14 +3,31 @@ import torch.nn.functional as F
 import torch
 from torch.autograd import Variable
 
-from resnet import *
+
 from aspp import DeepLabHead
 
 
 import torchvision
 import PIL
 from torchvision import transforms
+import torch.utils.model_zoo as model_zoo
+import torchvision.models as models
 
+
+model_urls = {
+    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
+    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
+    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
+    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
+    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
+}
+
+
+def resnet101(pretrained=False):
+    model = models.resnet101()
+    if pretrained:
+        model.load_state_dict(model_zoo.load_url(model_urls['resnet101']))
+    return model
 
 
 class DeepLabV3(nn.Module):
@@ -19,7 +36,7 @@ class DeepLabV3(nn.Module):
 
         self.num_classes = 21
 
-        self.backbone = resnet101() 
+        self.backbone = nn.Sequential(*list(resnet101(True).children())[:-2])
         self.classifier = DeepLabHead(2048  ,self.num_classes)
         #self.aux_classifier = FCNHead(self.num_classes) 
 
@@ -40,8 +57,7 @@ if __name__ == "__main__":
 
 
     input_image = PIL.Image.open('aachen_000000_000019_leftImg8bit.png')
-    preprocess = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),])
-    input_tensor = preprocess(input_image)
+    input_tensor = transforms.ToTensor()(input_image)
     input_batch = input_tensor.unsqueeze(0)
     input_batch = input_batch.to('cuda')
     print(input_batch.shape)   # torch.Size([1, 3, 1024, 2048])
